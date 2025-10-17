@@ -11,8 +11,4 @@ workflows:
     artifacts:
       - build/app/outputs/flutter-apk/app-release.apk
 
-  vars:
-    CM_FLUTTER_VERSION: "3.16.0" # or your specific version
 
-      
-  
