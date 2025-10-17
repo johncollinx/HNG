@@ -4,8 +4,7 @@ workflows:
     environment:
       groups:
         - your_environment_variables
-      vars:
-        CM_FLUTTER_VERSION: "3.22.0"
+    
     
     scripts:
       - name: Build with Verbose Logging
