@@ -3,7 +3,7 @@ workflows:
     name: Build Android APK
     working_directory: portfolio_app
     environment:
-      flutter: stable
+      flutter:"3.22.0"
     scripts:
       - flutter pub get
       - flutter build apk
