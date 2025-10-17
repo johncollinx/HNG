@@ -1,9 +1,60 @@
-scripts:
-  - name: Build with Latest Flutter
-    script: |
-      flutter channel master
-      flutter upgrade
-      flutter --version
-      flutter clean
-      flutter pub get
-      flutter build apk --release --verbose
+workflows:
+  android-release:
+    name: Android Release with Verbose Logging
+    environment:
+      groups:
+        - your_environment_variables
+      vars:
+        CM_FLUTTER_VERSION: "3.22.0" # Latest stable Flutter
+    
+    scripts:
+      - name: Show Environment Info
+        script: |
+          echo "=== Build Environment Information ==="
+          flutter --version
+          echo "Java version:"
+          java -version
+          echo "Gradle version:"
+          cd android && ./gradlew --version && cd ..
+          echo "=== Environment Info Complete ==="
+
+      - name: Clean and Get Dependencies
+        script: |
+          echo "=== Cleaning Project ==="
+          flutter clean
+          echo "=== Getting Dependencies ==="
+          flutter pub get --verbose
+
+      - name: Analyze Code
+        script: |
+          echo "=== Analyzing Code ==="
+          flutter analyze --verbose
+
+      - name: Build Android APK with Verbose Logging
+        script: |
+          echo "=== Starting Android APK Build ==="
+          flutter build apk --release --verbose --no-tree-shake-icons
+
+      - name: Build Android App Bundle with Verbose Logging
+        script: |
+          echo "=== Starting Android App Bundle Build ==="
+          flutter build appbundle --release --verbose --no-tree-shake-icons
+
+      - name: List Build Outputs
+        script: |
+          echo "=== Build Artifacts ==="
+          find build -name "*.apk" -o -name "*.aab" | while read file; do
+            echo "Found: $file"
+            ls -la "$file"
+          done
+          echo "=== Build Artifacts Listing Complete ==="
+
+    artifacts:
+      - build/**/outputs/**/*.apk
+      - build/**/outputs/**/*.aab
+      - flutter_build.log
+
+    publishing:
+      email:
+        recipients:
+          - your-email@example.com
