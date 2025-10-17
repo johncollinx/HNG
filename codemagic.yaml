@@ -1,60 +1,123 @@
 workflows:
-  android-release:
-    name: Android Release with Verbose Logging
+  android-release-verbose:
+    name: Android Release Super Verbose
     environment:
       groups:
         - your_environment_variables
       vars:
-        CM_FLUTTER_VERSION: "3.22.0" # Latest stable Flutter
+        CM_FLUTTER_VERSION: "3.22.0"
     
     scripts:
-      - name: Show Environment Info
+      - name: System Diagnostics
         script: |
-          echo "=== Build Environment Information ==="
+          echo "=== SYSTEM DIAGNOSTICS ==="
+          echo "Flutter:"
           flutter --version
-          echo "Java version:"
+          echo "Dart:"
+          dart --version
+          echo "Java:"
           java -version
-          echo "Gradle version:"
-          cd android && ./gradlew --version && cd ..
-          echo "=== Environment Info Complete ==="
+          echo "Android SDK:"
+          sdkmanager --list | head -20
+          echo "=== END DIAGNOSTICS ==="
 
-      - name: Clean and Get Dependencies
+      - name: Project Setup
         script: |
-          echo "=== Cleaning Project ==="
+          echo "=== PROJECT SETUP ==="
+          echo "Current directory: $(pwd)"
+          echo "Directory structure:"
+          ls -la
+          echo "Flutter project structure:"
+          find . -name "pubspec.yaml" -o -name "android" -type d | head -10
+          echo "=== END PROJECT SETUP ==="
+
+      - name: Dependency Resolution
+        script: |
+          echo "=== DEPENDENCY RESOLUTION ==="
+          echo "Cleaning project..."
           flutter clean
-          echo "=== Getting Dependencies ==="
-          flutter pub get --verbose
+          echo "Getting dependencies with verbose output..."
+          flutter pub get --verbose 2>&1 | tee pub_get.log
+          echo "Dependency resolution complete. Log saved to pub_get.log"
 
-      - name: Analyze Code
+      - name: Code Validation
         script: |
-          echo "=== Analyzing Code ==="
-          flutter analyze --verbose
+          echo "=== CODE VALIDATION ==="
+          echo "Running flutter analyze..."
+          flutter analyze --verbose 2>&1 | tee analyze.log
+          echo "Analysis complete. Log saved to analyze.log"
 
-      - name: Build Android APK with Verbose Logging
+      - name: Android Build Setup
         script: |
-          echo "=== Starting Android APK Build ==="
-          flutter build apk --release --verbose --no-tree-shake-icons
+          echo "=== ANDROID BUILD SETUP ==="
+          echo "Android directory structure:"
+          ls -la android/
+          echo "Gradle files:"
+          find android -name "*.gradle" -o -name "gradle.properties" | head -10
+          echo "Testing Gradle configuration..."
+          cd android && ./gradlew clean --debug 2>&1 | tail -50
+          cd ..
+          echo "=== END ANDROID BUILD SETUP ==="
 
-      - name: Build Android App Bundle with Verbose Logging
+      - name: Build APK with Maximum Verbosity
         script: |
-          echo "=== Starting Android App Bundle Build ==="
-          flutter build appbundle --release --verbose --no-tree-shake-icons
+          echo "=== APK BUILD STARTED ==="
+          echo "Timestamp: $(date)"
+          flutter build apk \
+            --release \
+            --verbose \
+            --no-tree-shake-icons \
+            --dart-define=BUILD_MODE=release 2>&1 | tee apk_build.log
+          echo "APK build completed. Full log in apk_build.log"
+          echo "Timestamp: $(date)"
 
-      - name: List Build Outputs
+      - name: Build App Bundle with Maximum Verbosity
         script: |
-          echo "=== Build Artifacts ==="
+          echo "=== APP BUNDLE BUILD STARTED ==="
+          echo "Timestamp: $(date)"
+          flutter build appbundle \
+            --release \
+            --verbose \
+            --no-tree-shake-icons \
+            --dart-define=BUILD_MODE=release 2>&1 | tee bundle_build.log
+          echo "App bundle build completed. Full log in bundle_build.log"
+          echo "Timestamp: $(date)"
+
+      - name: Build Artifact Verification
+        script: |
+          echo "=== BUILD ARTIFACT VERIFICATION ==="
+          echo "Searching for build outputs..."
+          find build -type f \( -name "*.apk" -o -name "*.aab" \) -exec ls -la {} \;
+          echo "APK files:"
+          find build -name "*.apk" -exec echo "  {}" \;
+          echo "AAB files:"
+          find build -name "*.aab" -exec echo "  {}" \;
+          echo "=== VERIFICATION COMPLETE ==="
+
+      - name: Generate Build Report
+        script: |
+          echo "=== BUILD REPORT ==="
+          echo "Build completed at: $(date)"
+          echo "Final artifacts:"
           find build -name "*.apk" -o -name "*.aab" | while read file; do
-            echo "Found: $file"
-            ls -la "$file"
+            size=$(du -h "$file" | cut -f1)
+            echo "  - $file ($size)"
           done
-          echo "=== Build Artifacts Listing Complete ==="
+          echo "=== END BUILD REPORT ==="
 
     artifacts:
       - build/**/outputs/**/*.apk
       - build/**/outputs/**/*.aab
+      - pub_get.log
+      - analyze.log
+      - apk_build.log
+      - bundle_build.log
       - flutter_build.log
 
     publishing:
       email:
         recipients:
           - your-email@example.com
+        notify:
+          success: true
+          failure: true
