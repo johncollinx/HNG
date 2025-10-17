@@ -7,5 +7,13 @@ workflows:
     scripts:
       - flutter pub get
       - flutter build apk
+    - cd android
+     - ./gradlew clean
     artifacts:
       - build/app/outputs/flutter-apk/app-release.apk
+
+  vars:
+    CM_FLUTTER_VERSION: "3.16.0" # or your specific version
+
+      
+  
