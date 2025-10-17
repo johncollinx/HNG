@@ -1,13 +1,11 @@
 workflows:
-  default-workflow:
-    name: Workflow
-    max_build_duration: 60
+  build-android:
+    name: Build Android APK
+    working_directory: portfolio_app
     environment:
       flutter: stable
     scripts:
-      - name: Install dependencies
-        script: flutter pub get
-      - name: Run tests
-        script: flutter test
+      - flutter pub get
+      - flutter build apk
     artifacts:
-      - build/**/outputs/**/*.apk
+      - build/app/outputs/flutter-apk/app-release.apk
