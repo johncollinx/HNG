@@ -24,16 +24,15 @@ if (flutterVersionName == null) {
 
 android {
     namespace "com.example.portfolio_app"
-    compileSdk flutter.compileSdkVersion
-    ndkVersion flutter.ndkVersion
-
+    compileSdk 34 // Latest Android SDK
+    
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_11
-        targetCompatibility JavaVersion.VERSION_11
+        sourceCompatibility JavaVersion.VERSION_17 // Updated to Java 17
+        targetCompatibility JavaVersion.VERSION_17
     }
 
     kotlinOptions {
-        jvmTarget = '11'
+        jvmTarget = '17' // Updated to Java 17
     }
 
     sourceSets {
@@ -42,8 +41,8 @@ android {
 
     defaultConfig {
         applicationId "com.example.portfolio_app"
-        minSdkVersion flutter.minSdkVersion
-        targetSdkVersion flutter.targetSdkVersion
+        minSdkVersion 21
+        targetSdkVersion 34 // Latest target SDK
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
     }
@@ -51,7 +50,14 @@ android {
     buildTypes {
         release {
             signingConfig signingConfigs.debug
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
+    }
+
+    buildFeatures {
+        buildConfig true
     }
 }
 
@@ -60,5 +66,5 @@ flutter {
 }
 
 dependencies {
-    // Add any required dependencies here
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:1.9.22"
 }
