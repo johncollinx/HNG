@@ -1,14 +1,29 @@
 workflows:
-  build-android:
-    name: Build Android APK
-    working_directory: portfolio_app
+  android-release:
+    name: Android Release Latest
     environment:
-      flutter: stable
+      groups:
+        - your_environment_variables
+      vars:
+        CM_FLUTTER_VERSION: "3.22.0" # Latest stable Flutter
+    
     scripts:
-      - flutter pub get
-      - flutter build apk
-   
+      - name: Build Android APK with Latest Versions
+        script: |
+          flutter --version
+          flutter clean
+          flutter pub get
+          
+          # Update Android SDK if needed
+          sdkmanager --update
+          sdkmanager "build-tools;34.0.0" "platforms;android-34"
+          
+          flutter build apk --release --verbose
+          
+      - name: Build Android App Bundle
+        script: |
+          flutter build appbundle --release --verbose
+
     artifacts:
-      - build/app/outputs/flutter-apk/app-release.apk
-
-
+      - build/**/outputs/**/*.apk
+      - build/**/outputs/**/*.aab
