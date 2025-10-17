@@ -1,19 +1,11 @@
 workflows:
-  android-release:
-    name: Android Release
+  build-android:
+    name: Build Android APK
+    working_directory: portfolio_app
     environment:
-      groups:
-        - your_environment_variables
-    
-    
+      flutter: stable
     scripts:
-      - name: Build with Verbose Logging
-        script: |
-          flutter clean
-          flutter pub get --verbose
-          flutter build apk --release --verbose --no-tree-shake-icons
-
+      - flutter pub get
+      - flutter build apk
     artifacts:
-      - build/**/outputs/**/*.apk
-      
-      
+      - build/app/outputs/flutter-apk/app-release.apk
